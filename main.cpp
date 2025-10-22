@@ -61,6 +61,8 @@ public:
     }
 };
 
+float calculateAngle(const Vector3 &v1, const Vector3 &v2);
+
 int main() {
     // 1. czy dodawanie jest przemienne?
     Vector3 a(1, 2, 3);
@@ -81,12 +83,7 @@ int main() {
     Vector3 v1(0, 3, 0);
     Vector3 v2(5, 5, 0);
 
-    float dotProd = v1.dot(v2);
-    float len1 = v1.length();
-    float len2 = v2.length();
-    float cosTheta = dotProd / (len1 * len2);
-    float angleRad = std::acos(cosTheta);
-    float angleDeg = angleRad * 180.0f / M_PI;
+    float angleDeg = calculateAngle(v1, v2);
 
     std::cout << "Kat pomiedzy [0,3,0] a [5,5,0] = " << angleDeg << " stopni" << std::endl;
 
@@ -108,4 +105,14 @@ int main() {
     std::cout << "Dlugosc wektora znormalizowanego = " << normalized.length() << std::endl;
 
     return 0;
+}
+
+float calculateAngle(const Vector3 &v1, const Vector3 &v2) {
+    float dotProd = v1.dot(v2);
+    float len1 = v1.length();
+    float len2 = v2.length();
+    float cosTheta = dotProd / (len1 * len2);
+    float angleRad = std::acos(cosTheta);
+    float angleDeg = angleRad * 180.0f / M_PI;
+    return angleDeg;
 }
