@@ -3,4 +3,5 @@ project(matematykaGrafiki)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(matematykaGrafiki main.cpp)
+add_executable(matematykaGrafiki zad1.cpp
+        zad2.cpp)
