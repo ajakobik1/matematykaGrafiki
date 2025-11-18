@@ -255,7 +255,27 @@ int main() {
     Macierz R = Macierz::RotY(90);
     TransformujWektor(v, R, out);
 
-    out.close();
     std::cout << "Wyniki zapisane do pliku wyniki.txt\n";
+
+
+    Macierz G;
+    G.m[0][0] = 2; G.m[0][1] = 1; G.m[0][2] = 0; G.m[0][3] = 0;
+    G.m[1][0] = 0; G.m[1][1] = 1; G.m[1][2] = 1; G.m[1][3] = 0;
+    G.m[2][0] = 1; G.m[2][1] = 0; G.m[2][2] = 1; G.m[2][3] = 0;
+    G.m[3][3] = 1;
+
+    G = G.RotX(45);
+    G.Zapisz(out);
+
+    G = G.RotX(-45);
+    G.Zapisz(out);
+
+    G = G.RotX(-45);
+    G.Zapisz(out);
+
+    G = G.Odwrotna();
+    G.Zapisz(out);
+
+    out.close();
     return 0;
 }
