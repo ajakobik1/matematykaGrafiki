@@ -9,6 +9,8 @@ public:
     Quaternion(double w=0, double x=0, double y=0, double z=0)
         : w(w), x(x), y(y), z(z) {}
 
+    // PODSTAWOWE DZIAŁANIA
+
     // Dodawanie
     Quaternion operator+(const Quaternion &q) const {
         return Quaternion(w + q.w, x + q.x, y + q.y, z + q.z);
@@ -19,7 +21,7 @@ public:
         return Quaternion(w - q.w, x - q.x, y - q.y, z - q.z);
     }
 
-    // Mnożenie
+    // Mnożenie (zgodne z notatkami)
     Quaternion operator*(const Quaternion &q) const {
         return Quaternion(
             w*q.w - x*q.x - y*q.y - z*q.z,
@@ -29,97 +31,119 @@ public:
         );
     }
 
-    // Sprzężenie
+    // SPRZĘŻENIE (a − v)
     Quaternion conjugate() const {
         return Quaternion(w, -x, -y, -z);
     }
 
-    // Norma
+    // NORMA ||q||
     double norm() const {
         return std::sqrt(w*w + x*x + y*y + z*z);
     }
 
-    // Normalizacja
-    Quaternion normalized() const {
-        double n = norm();
-        return Quaternion(w/n, x/n, y/n, z/n);
+    // Kwadrat normy (potrzebny do odwrotności)
+    double normSquared() const {
+        return w*w + x*x + y*y + z*z;
     }
 
-    // Zapis do streamu
-    void write(std::ostream &os, std::string name = "") const {
-        os << name << "(" << w << ", " << x << ", " << y << ", " << z << ")\n";
+    // ODWROTNOŚĆ q⁻¹ = q* / ||q||²
+    Quaternion inverse() const {
+        double n2 = normSquared();
+        Quaternion conj = conjugate();
+        return Quaternion(conj.w / n2, conj.x / n2, conj.y / n2, conj.z / n2);
+    }
+
+    // DZIELENIE q1 / q2 = q1 * q2⁻¹
+    Quaternion operator/(const Quaternion &q) const {
+        return (*this) * q.inverse();
+    }
+
+    // Zapis kwaternionu do pliku
+    void write(std::ostream &os, const std::string &label = "") const {
+        os << label << "(" << w << ", " << x << ", " << y << ", " << z << ")\n";
     }
 };
 
-// Obrót punktu (wektora) przez kwaternion
+// Obrót punktu wektora kwaternionem: v' = q v q*
 Quaternion rotatePoint(const Quaternion &q, const Quaternion &p) {
-    Quaternion qn = q.normalized();
+    Quaternion qn = q;
     return qn * p * qn.conjugate();
 }
+
+// MAIN — TESTY + ZAPIS DO PLIKU
 
 int main() {
     std::ofstream file("wyniki.txt");
     if (!file.is_open()) {
-        std::cerr << "Nie udalo sie otworzyc pliku!\n";
+        std::cerr << "Błąd: nie mogę otworzyć pliku wyniki.txt\n";
         return 1;
     }
 
-    file << "=== TESTY KWATERNIONOW ===\n\n";
+    file << "================= TESTY KWATERNIONÓW =================\n\n";
 
-    Quaternion a(1, 2, 3, 4);
-    Quaternion b(0.5, -1, 2, 0);
+    Quaternion A(1, 2, 3, 4);
+    Quaternion B(0.5, -1, 2, 0);
 
-    file << "--- A i B ---\n";
-    a.write(file, "A = ");
-    b.write(file, "B = ");
+    file << "--- Kwaterniony testowe ---\n";
+    A.write(file, "A = ");
+    B.write(file, "B = ");
     file << "\n";
 
-    // Testy działań
-    file << "--- Dzialania ---\n";
-    (a + b).write(file, "A + B = ");
-    (a - b).write(file, "A - B = ");
-    (a * b).write(file, "A * B = ");
-    (b * a).write(file, "B * A = ");
+    // DZIAŁANIA
 
-    file << "\n--- Sprzezenie ---\n";
-    a.conjugate().write(file, "conj(A) = ");
-    b.conjugate().write(file, "conj(B) = ");
+    file << "--- Dodawanie ---\n";
+    (A + B).write(file, "A + B = ");
 
-    file << "\n--- Norma ---\n";
-    file << "||A|| = " << a.norm() << "\n";
-    file << "||B|| = " << b.norm() << "\n";
+    file << "\n--- Odejmowanie ---\n";
+    (A - B).write(file, "A - B = ");
 
-    file << "\n--- Normalizacja ---\n";
-    a.normalized().write(file, "A_norm = ");
-    b.normalized().write(file, "B_norm = ");
+    file << "\n--- Mnożenie ---\n";
+    (A * B).write(file, "A * B = ");
+    (B * A).write(file, "B * A = ");
 
-    // Niezmienność mnożenia
-    file << "\n=== BRAK PRZEMIENNOSCI ===\n";
-    Quaternion ab = a * b;
-    Quaternion ba = b * a;
+    file << "\n--- Sprzężenie ---\n";
+    A.conjugate().write(file, "conj(A) = ");
+    B.conjugate().write(file, "conj(B) = ");
+
+    file << "\n--- Norma i norma^2 ---\n";
+    file << "||A|| = " << A.norm() << "\n";
+    file << "||B|| = " << B.norm() << "\n";
+    file << "||A||^2 = " << A.normSquared() << "\n";
+    file << "||B||^2 = " << B.normSquared() << "\n";
+
+    file << "\n--- Odwrotność ---\n";
+    A.inverse().write(file, "A^-1 = ");
+    B.inverse().write(file, "B^-1 = ");
+
+    file << "\n--- Dzielenie ---\n";
+    (A / B).write(file, "A / B = ");
+    (B / A).write(file, "B / A = ");
+
+    file << "\nCzy A/B * B = A ? -> Sprawdzamy\n";
+    ((A / B) * B).write(file, "(A/B) * B = ");
+
+    // BRAK PRZEMIENNOŚCI
+    file << "\n--- Brak przemienności ---\n";
+    Quaternion ab = A * B;
+    Quaternion ba = B * A;
 
     ab.write(file, "A * B = ");
     ba.write(file, "B * A = ");
     file << "Czy A * B = B * A?  ->  NIE\n";
 
-    // Obrót punktu
-    file << "\n=== OBRÓT PUNKTU ===\n";
-    file << "Punkt: (-1, -1, -1)\n";
-    file << "Obrot: 270 stopni wokol osi X\n";
+    // OBRÓT PUNKTU
+    file << "\n--- Obrót punktu (-1, -1, -1) o 270° wokół osi X ---\n";
 
     double angle = 270 * M_PI / 180.0;
-    double half = angle / 2.0;
+    Quaternion q_rot(std::cos(angle/2), std::sin(angle/2), 0, 0);
 
-    // Oś X = (1,0,0)
-    Quaternion q_rot(std::cos(half), std::sin(half), 0, 0);
     Quaternion point(0, -1, -1, -1);
-
     Quaternion rotated = rotatePoint(q_rot, point);
 
-    rotated.write(file, "Po obrocie punkt = ");
+    rotated.write(file, "Po obrocie = ");
 
     file.close();
-    std::cout << "Wyniki zapisane w pliku wyniki.txt\n";
+    std::cout << "Wyniki zapisane w wyniki.txt\n";
 
     return 0;
 }
