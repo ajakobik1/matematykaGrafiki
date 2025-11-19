@@ -36,19 +36,19 @@ public:
         return Quaternion(w, -x, -y, -z);
     }
 
-    // NORMA ||q||
-    double norm() const {
+    // LENGTH ||q||
+    double length() const {
         return std::sqrt(w*w + x*x + y*y + z*z);
     }
 
-    // Kwadrat normy (potrzebny do odwrotności)
-    double normSquared() const {
+    // Kwadrat długości (potrzebny do odwrotności)
+    double lengthSquared() const {
         return w*w + x*x + y*y + z*z;
     }
 
     // ODWROTNOŚĆ q⁻¹ = q* / ||q||²
     Quaternion inverse() const {
-        double n2 = normSquared();
+        double n2 = lengthSquared();
         Quaternion conj = conjugate();
         return Quaternion(conj.w / n2, conj.x / n2, conj.y / n2, conj.z / n2);
     }
@@ -106,10 +106,10 @@ int main() {
     B.conjugate().write(file, "conj(B) = ");
 
     file << "\n--- Norma i norma^2 ---\n";
-    file << "||A|| = " << A.norm() << "\n";
-    file << "||B|| = " << B.norm() << "\n";
-    file << "||A||^2 = " << A.normSquared() << "\n";
-    file << "||B||^2 = " << B.normSquared() << "\n";
+    file << "||A|| = " << A.length() << "\n";
+    file << "||B|| = " << B.length() << "\n";
+    file << "||A||^2 = " << A.lengthSquared() << "\n";
+    file << "||B||^2 = " << B.lengthSquared() << "\n";
 
     file << "\n--- Odwrotność ---\n";
     A.inverse().write(file, "A^-1 = ");

@@ -1,33 +1,44 @@
-=== TESTY KWATERNIONOW ===
+================= TESTY KWATERNIONÓW =================
 
---- A i B ---
+--- Kwaterniony testowe ---
 A = (1, 2, 3, 4)
 B = (0.5, -1, 2, 0)
 
---- Dzialania ---
+--- Dodawanie ---
 A + B = (1.5, 1, 5, 4)
+
+--- Odejmowanie ---
 A - B = (0.5, 3, 1, 4)
+
+--- Mnożenie ---
 A * B = (-3.5, -8, -0.5, 9)
 B * A = (-3.5, 8, 7.5, -5)
 
---- Sprzezenie ---
+--- Sprzężenie ---
 conj(A) = (1, -2, -3, -4)
 conj(B) = (0.5, 1, -2, -0)
 
---- Norma ---
+--- Norma i norma^2 ---
 ||A|| = 5.47723
 ||B|| = 2.29129
+||A||^2 = 30
+||B||^2 = 5.25
 
---- Normalizacja ---
-A_norm = (0.182574, 0.365148, 0.547723, 0.730297)
-B_norm = (0.218218, -0.436436, 0.872872, 0)
+--- Odwrotność ---
+A^-1 = (0.0333333, -0.0666667, -0.1, -0.133333)
+B^-1 = (0.0952381, 0.190476, -0.380952, -0)
 
-=== BRAK PRZEMIENNOSCI ===
+--- Dzielenie ---
+A / B = (0.857143, 1.90476, 0.666667, -0.952381)
+B / A = (0.15, -0.333333, -0.116667, 0.166667)
+
+Czy A/B * B = A ? -> Sprawdzamy
+(A/B) * B = (1, 2, 3, 4)
+
+--- Brak przemienności ---
 A * B = (-3.5, -8, -0.5, 9)
 B * A = (-3.5, 8, 7.5, -5)
 Czy A * B = B * A?  ->  NIE
 
-=== OBRÓT PUNKTU ===
-Punkt: (-1, -1, -1)
-Obrot: 270 stopni wokol osi X
-Po obrocie punkt = (0, -1, -1, 1)
+--- Obrót punktu (-1, -1, -1) o 270° wokół osi X ---
+Po obrocie = (0, -1, -1, 1)
