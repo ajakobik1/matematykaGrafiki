@@ -21,7 +21,7 @@ public:
         return Quaternion(w - q.w, x - q.x, y - q.y, z - q.z);
     }
 
-    // Mnożenie (zgodne z notatkami)
+    // Mnożenie
     Quaternion operator*(const Quaternion &q) const {
         return Quaternion(
             w*q.w - x*q.x - y*q.y - z*q.z,

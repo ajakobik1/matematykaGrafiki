@@ -1,44 +1,35 @@
-================= TESTY KWATERNIONÓW =================
-
---- Kwaterniony testowe ---
-A = (1, 2, 3, 4)
-B = (0.5, -1, 2, 0)
-
---- Dodawanie ---
-A + B = (1.5, 1, 5, 4)
-
---- Odejmowanie ---
-A - B = (0.5, 3, 1, 4)
-
---- Mnożenie ---
-A * B = (-3.5, -8, -0.5, 9)
-B * A = (-3.5, 8, 7.5, -5)
-
---- Sprzężenie ---
-conj(A) = (1, -2, -3, -4)
-conj(B) = (0.5, 1, -2, -0)
-
---- Norma i norma^2 ---
-||A|| = 5.47723
-||B|| = 2.29129
-||A||^2 = 30
-||B||^2 = 5.25
-
---- Odwrotność ---
-A^-1 = (0.0333333, -0.0666667, -0.1, -0.133333)
-B^-1 = (0.0952381, 0.190476, -0.380952, -0)
-
---- Dzielenie ---
-A / B = (0.857143, 1.90476, 0.666667, -0.952381)
-B / A = (0.15, -0.333333, -0.116667, 0.166667)
-
-Czy A/B * B = A ? -> Sprawdzamy
-(A/B) * B = (1, 2, 3, 4)
-
---- Brak przemienności ---
-A * B = (-3.5, -8, -0.5, 9)
-B * A = (-3.5, 8, 7.5, -5)
-Czy A * B = B * A?  ->  NIE
-
---- Obrót punktu (-1, -1, -1) o 270° wokół osi X ---
-Po obrocie = (0, -1, -1, 1)
+ZADANIE 1: Znajdz punkt przeciecia prostych
+Prosta A: (x+2)/3 = y-4 = z/5
+Prosta B: (x+2)/1 = -1/5(y-4) = z/3
+WYNIK: Punkt przeciecia to (-2.00, 4.00, 0.00)
+-----------------------------------
+ZADANIE 2: Znajdz kat miedzy prostymi z zadania 1
+WYNIK: 68.20 stopni
+-----------------------------------
+ZADANIE 3: Znajdz punkt przeciecia prostej i plaszczyzny
+Prosta: parametryczna t, Płaszczyzna: 2x+3y+3z-8=0
+WYNIK: Punkt przeciecia to (1.00, 1.00, 1.00)
+-----------------------------------
+ZADANIE 4: Znajdz kat pomiedzy prosta a plaszczyzna z zadania 2 (wg treści zadania 3)
+WYNIK: 30.85 stopni
+-----------------------------------
+ZADANIE 5: Znajdz prosta przeciecia plaszczyzn
+Plaszczyzna A: 2x-y+z-8=0
+Plaszczyzna B: 4x+3y+z+14=0
+WYNIK: Rownanie parametryczne prostej:
+       Punkt P(1.00, -6.00, 0.00) + t * Wektor V(-4.00, 2.00, 10.00)
+-----------------------------------
+ZADANIE 6: Znajdz kat pomiedzy plaszczyznami z zadania 5
+WYNIK: 61.29 stopni
+-----------------------------------
+ZADANIE 7: Znajdz punkt przeciecia dwoch odcinkow
+Odcinek A: (5,5,4)->(10,10,6)
+Odcinek B: (5,5,5)->(10,10,3)
+WYNIK: Punkt przeciecia to (6.25, 6.25, 4.50)
+-----------------------------------
+ZADANIE (str. 2) nr 1: Punkt przeciecia sfery i prostej
+DANE: Sfera r=5.10, Prosta przez A i A'
+WYNIK: Dwa punkty przeciecia:
+       Punkt 1: (1.00, -5.00, -0.00)
+       Punkt 2: (4.00, 1.00, -3.00)
+-----------------------------------
