@@ -25,51 +25,74 @@ struct Vec3 {
     double dot(const Vec3& v) const { return x*v.x + y*v.y + z*v.z; }
 };
 
-// Structure for ray
+// Struktura reprezentująca promień (jak promień światła lub laser)
 struct Ray {
-    Vec3 origin;
-    Vec3 direction;
+    Vec3 origin;    // Punkt początkowy (miejsce, z którego wystrzeliwujemy promień, np. oko kamery)
+    Vec3 direction; // Kierunek, w którym leci promień (wektor)
 
+    // Konstruktor promienia:
+    // Pobiera punkt startowy (o) i kierunek (d).
+    // Kierunek jest od razu "normalizowany" (skracany/wydłużany do długości 1),
+    // aby ułatwić późniejsze obliczenia odległości.
     Ray(const Vec3& o, const Vec3& d) : origin(o), direction(d.normalize()) {}
 
-    Vec3 pointAt(double t) const { return origin + direction * t; }
+    // Funkcja obliczająca punkt na linii promienia w danej odległości 't'
+    // t to parametr (liczba), który mówi nam, jak daleko poleciał promień.
+    // Wzór: Punkt = Start + (Kierunek * Odległość)
+    Vec3 pointAt(double t) const {
+        return origin + direction * t;
+    }
 };
 
 // Cube class (AABB - Axis Aligned Bounding Box)
 class Cube {
 private:
-    Vec3 minPoint;
-    Vec3 maxPoint;
+    Vec3 minPoint; // Punkt o minimalnych współrzędnych (x_min, y_min, z_min)
+    Vec3 maxPoint; // Punkt o maksymalnych współrzędnych (x_max, y_max, z_max)
 
 public:
+    /**
+     * Konstruktor inicjalizujący granice bryły na podstawie punktu centralnego i długości boku.
+     */
     Cube(const Vec3& center, double size) {
         double half = size / 2.0;
         minPoint = Vec3(center.x - half, center.y - half, center.z - half);
         maxPoint = Vec3(center.x + half, center.y + half, center.z + half);
     }
 
-    // Check ray-cube intersection (slab algorithm)
+    /**
+     * Sprawdza przecięcie promienia z trzema parami płaszczyzn ograniczających bryłę (slabs).
+     * * @param ray Referencja do obiektu promienia.
+     * @param tMin Parametr wyjściowy zwracający najbliższą odległość do punktu trafienia.
+     * @return true, jeśli promień przecina objętość bryły; w przeciwnym razie false.
+     */
     bool intersect(const Ray& ray, double& tMin) const {
+        // Wyznaczenie przedziałów wejścia/wyjścia dla każdej z osi X, Y, Z
+        // Wykorzystujemy parametryczne równanie prostej: P(t) = O + tD
+
+        // Analiza dla osi X
         double t1 = (minPoint.x - ray.origin.x) / ray.direction.x;
         double t2 = (maxPoint.x - ray.origin.x) / ray.direction.x;
-
         double tmin = min(t1, t2);
         double tmax = max(t1, t2);
 
+        // Analiza dla osi Y - wyznaczenie części wspólnej (iloczynu zbiorów) przedziałów t
         t1 = (minPoint.y - ray.origin.y) / ray.direction.y;
         t2 = (maxPoint.y - ray.origin.y) / ray.direction.y;
-
         tmin = max(tmin, min(t1, t2));
         tmax = min(tmax, max(t1, t2));
 
+        // Analiza dla osi Z
         t1 = (minPoint.z - ray.origin.z) / ray.direction.z;
         t2 = (maxPoint.z - ray.origin.z) / ray.direction.z;
-
         tmin = max(tmin, min(t1, t2));
         tmax = min(tmax, max(t1, t2));
 
+        // Warunek trafienia: przedział [tmin, tmax] musi być niepusty (tmax >= tmin)
+        // oraz znajdować się przed kamerą (tmax >= 0).
         if (tmax >= tmin && tmax >= 0) {
-            tMin = tmin >= 0 ? tmin : tmax;
+            // Wybór najbliższego punktu trafienia (z uwzględnieniem sytuacji, gdy kamera jest wewnątrz bryły)
+            tMin = (tmin >= 0) ? tmin : tmax;
             return true;
         }
         return false;
@@ -136,25 +159,35 @@ public:
         updatePosition();
     }
 
+    /**
+   * Generuje promień dla danego punktu na płaszczyźnie obrazu.
+   * @param u Znormalizowana współrzędna pozioma [0, 1].
+   * @param v Znormalizowana współrzędna pionowa [0, 1].
+   */
     Ray getRay(double u, double v, int width, int height) const {
-        // Calculate camera basis vectors
-        Vec3 forward = (target - position).normalize();
-        Vec3 right = Vec3(forward.z, 0, -forward.x).normalize();
+        // 1. Wyznaczenie lokalnego układu współrzędnych kamery (Camera Basis)
+        Vec3 forward = (target - position).normalize(); // Oś Z kamery
+        Vec3 right = Vec3(forward.z, 0, -forward.x).normalize(); // Oś X kamery (prostopadła do forward i pionu)
+
+        // Iloczyn wektorowy wyznaczający oś Y kamery (górę)
         Vec3 newUp = Vec3(
                 forward.y * right.z - forward.z * right.y,
                 forward.z * right.x - forward.x * right.z,
                 forward.x * right.y - forward.y * right.x
         ).normalize();
 
-        // Image plane dimensions
+        // 2. Obliczenie wymiarów rzutni (Viewport) na podstawie kąta widzenia (FOV)
         double aspectRatio = (double)width / height;
+        // Zamiana FOV na radiany i wyznaczenie wysokości płaszczyzny rzutowania
         double viewportHeight = 2.0 * tan(fov * M_PI / 360.0);
         double viewportWidth = viewportHeight * aspectRatio;
 
-        // Position on image plane
+        // 3. Mapowanie współrzędnych (u, v) na fizyczne wymiary rzutni
+        // Przesunięcie o -0,5 centruje układ współrzędnych na środku ekranu
         double x = (u - 0.5) * viewportWidth;
         double y = (v - 0.5) * viewportHeight;
 
+        // 4. Konstrukcja kierunku promienia jako kombinacji liniowej wektorów bazy
         Vec3 rayDir = forward + right * x + newUp * y;
         return Ray(position, rayDir);
     }
@@ -165,33 +198,42 @@ public:
     double getAngleV() const { return angleV * 180.0 / M_PI; }
 };
 
-// Function rendering the scene
+/**
+ * Główna funkcja potoku renderującego (Rendering Pipeline).
+ * Przetwarza scenę metodą Ray Castingu, mapując przestrzeń 3D na znaki ASCII.
+ */
 void render(const Camera& camera, const Cube& cube, int width, int height) {
+    // Inicjalizacja bufora ekranu domyślnym znakiem tła
     vector<vector<char>> screen(height, vector<char>(width, '.'));
 
-    // For each pixel
+    // Iteracja po wszystkich pikselach płaszczyzny obrazu
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            // Normalized coordinates [0, 1]
+            // Mapowanie współrzędnych rastrowych (pikseli) na współrzędne znormalizowane [0, 1]
             double u = (double)x / (width - 1);
-            double v = (double)(height - 1 - y) / (height - 1); // inverted Y
+            double v = (double)(height - 1 - y) / (height - 1); // Korekta orientacji osi Y
 
+            // Generowanie promienia rzutującego dla danego piksela
             Ray ray = camera.getRay(u, v, width, height);
 
+            // Test przecięcia promienia z geometrią sceny (kostką)
             double t;
             if (cube.intersect(ray, t)) {
+                // Jeśli nastąpiła kolizja, wpisujemy znak obiektu do bufora
                 screen[y][x] = '0';
             }
         }
     }
 
-    // Display
-    system("clear || cls"); // Clear screen (works on Linux and Windows)
+    // Wyświetlanie zawartości bufora w konsoli z ramką pomocniczą
+    system("clear || cls"); // Odświeżanie ekranu
 
+    // Rysowanie górnej krawędzi ramki
     cout << "+";
     for (int i = 0; i < width; i++) cout << "-";
     cout << "+\n";
 
+    // Wypisywanie wierszy bufora ekranu
     for (int y = 0; y < height; y++) {
         cout << "|";
         for (int x = 0; x < width; x++) {
@@ -200,11 +242,12 @@ void render(const Camera& camera, const Cube& cube, int width, int height) {
         cout << "|\n";
     }
 
+    // Rysowanie dolnej krawędzi oraz interfejsu użytkownika
     cout << "+";
     for (int i = 0; i < width; i++) cout << "-";
     cout << "+\n";
 
-    // Camera info
+    // Wyświetlanie metadanych kamery (parametry sferyczne)
     cout << "\nCamera: distance=" << camera.getRadius()
          << " | horizontal=" << (int)round(camera.getAngleH()) << " deg"
          << " | vertical=" << (int)round(camera.getAngleV()) << " deg\n";
